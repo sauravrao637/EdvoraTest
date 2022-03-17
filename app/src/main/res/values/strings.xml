@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Edvora Test</string>
+    <string name="edvora">Edvora</string>
+    <string name="username">Username</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="ride_types">Ride Types</string>
+    <string name="nearest">Nearest</string>
+    <string name="upcoming">Upcoming</string>
+    <string name="past">Past</string>
+    <string name="profile_picture">Profile Picture</string>
+    <string name="distancePrefix">Distance :</string>
+    <string name="state_name">State Name</string>
+    <string name="city_name">City Name</string>
+    <string name="ride_idPrefix">Ride Id :</string>
+    <string name="origin_stationPrefix">Origin Station :</string>
+    <string name="station_pathPrefix">Station Path :</string>
+    <string name="datePrefix">Date :</string>
+    <string name="map_image">Map Image</string>
+    <string name="rides">Rides :</string>
+    <string name="filters">Filters</string>
+</resources>
