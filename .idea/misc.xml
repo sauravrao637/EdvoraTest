@@ -4,11 +4,14 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/asus/AndroidStudioProjects/Template/app/src/main/res/layout/activity_main.xml" value="0.1" />
-        <entry key="..\:/Users/asus/Downloads/AppTemplate-master/EdvoraTest/app/src/main/res/layout/activity_main.xml" value="0.264" />
+        <entry key="..\:/Users/asus/AppData/Local/Android/Sdk/platforms/android-31/data/res/layout/simple_spinner_dropdown_item.xml" value="0.1" />
+        <entry key="..\:/Users/asus/Downloads/AppTemplate-master/EdvoraTest/app/src/main/res/layout/activity_main.xml" value="0.2564102564102564" />
         <entry key="..\:/Users/asus/Downloads/AppTemplate-master/EdvoraTest/app/src/main/res/layout/custom_action_bar.xml" value="0.152" />
         <entry key="..\:/Users/asus/Downloads/AppTemplate-master/EdvoraTest/app/src/main/res/layout/fragment_nearest_rides.xml" value="0.1" />
         <entry key="..\:/Users/asus/Downloads/AppTemplate-master/EdvoraTest/app/src/main/res/layout/fragment_rides.xml" value="0.1" />
-        <entry key="..\:/Users/asus/Downloads/AppTemplate-master/EdvoraTest/app/src/main/res/layout/ride_item.xml" value="0.136" />
+        <entry key="..\:/Users/asus/Downloads/AppTemplate-master/EdvoraTest/app/src/main/res/layout/ride_item.xml" value="0.264" />
+        <entry key="..\:/Users/asus/Downloads/AppTemplate-master/EdvoraTest/app/src/main/res/layout/spinner_drop_down_item.xml" value="0.12158054711246201" />
+        <entry key="..\:/Users/asus/Downloads/AppTemplate-master/EdvoraTest/app/src/main/res/layout/spinner_item.xml" value="0.1" />
       </map>
     </option>
   </component>

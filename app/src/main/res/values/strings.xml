@@ -19,4 +19,6 @@
     <string name="map_image">Map Image</string>
     <string name="rides">Rides :</string>
     <string name="filters">Filters</string>
+    <string name="state">State</string>
+    <string name="city">City</string>
 </resources>

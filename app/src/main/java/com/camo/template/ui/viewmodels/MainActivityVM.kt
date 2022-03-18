@@ -24,26 +24,32 @@ class MainActivityVM @Inject constructor(
 
     private val _ridesState = MutableStateFlow<Resource<Rides>>(Resource.idle())
     val ridesState: StateFlow<Resource<Rides>> get() = _ridesState
-
+    var upcomingCount = 0
+    var pastCount = 0
     private val _userState = MutableStateFlow<Resource<User>>(Resource.idle())
     val userState: StateFlow<Resource<User>> get() = _userState
 
-    private val states = mutableListOf<String>()
-    private val mapStateToCities = mutableMapOf<String, ArrayList<String>>()
-
-//    private val _nearestRidesState = MutableStateFlow<Resource<Rides>>(Resource.idle())
-//    val nearestRidesState:StateFlow<Resource<Rides>>get() = _nearestRidesState
-//
-//    private val _upcomingRidesState = MutableStateFlow<Resource<Rides>>()
+    private val _statesFlow = MutableStateFlow(arrayListOf(STATE))
+    val statesFlow: StateFlow<ArrayList<String>> get() = _statesFlow
+    private val mapStateToCities = mutableMapOf<String, MutableSet<String>>()
+    private val _citiesFlow = MutableStateFlow(mutableListOf(CITY))
+    val citiesFlow: StateFlow<MutableList<String>> get() = _citiesFlow
 
     private val _filterByState = MutableStateFlow(STATE)
     val filterByState: StateFlow<String> get() = _filterByState
     private val _filterByCity = MutableStateFlow(CITY)
     val filterByCity: StateFlow<String> get() = _filterByCity
 
-    val filterState = combine(_filterByCity, _filterByState) { a, b ->
-        FilterState(a, b)
-    }
+    val filterState: StateFlow<FilterState> =
+        combine(_filterByCity, _filterByState, _statesFlow, _citiesFlow) { a, b, c, d ->
+            FilterState(a, b, c, d)
+        }.stateIn(
+            viewModelScope, started = SharingStarted.Eagerly, FilterState(
+                CITY, STATE, mutableListOf(STATE),
+                mutableListOf(CITY)
+            )
+        )
+
     init {
         refresh()
     }
@@ -61,8 +67,6 @@ class MainActivityVM @Inject constructor(
 
     private var _getRidesJob: Job? = null
     private fun getRides() {
-        states.clear()
-        mapStateToCities.clear()
         _getRidesJob?.cancel()
         _getRidesJob = viewModelScope.launch {
             cgRepo.getRidesFlow().collect {
@@ -78,16 +82,31 @@ class MainActivityVM @Inject constructor(
     private fun addStatesAndCities(rides: Rides) {
         if (rides.isEmpty()) return
         viewModelScope.launch {
+            mapStateToCities.clear()
+            upcomingCount = 0
+            pastCount = 0
             val statesSet = mutableSetOf<String>()
+            val citiesSet = mutableSetOf<String>()
             for (ride in rides) {
+                if (ride.upcoming) upcomingCount += 1 else pastCount += 1
                 statesSet.add(ride.state.lowercase())
+                citiesSet.add(ride.city.lowercase())
                 if (mapStateToCities.containsKey(ride.state.lowercase())) {
                     mapStateToCities[ride.state.lowercase()]!!.add(ride.city.lowercase())
                 } else {
-                    mapStateToCities[ride.state.lowercase()] = arrayListOf(ride.city.lowercase())
+                    mapStateToCities[ride.state.lowercase()] = mutableSetOf(ride.city.lowercase())
+                    mapStateToCities[ride.state.lowercase()]!!.add(CITY)
                 }
             }
+            val states = arrayListOf(STATE)
             states.addAll(statesSet)
+            _statesFlow.value = states
+            val cities = arrayListOf(CITY)
+            cities.addAll(citiesSet)
+            _citiesFlow.value = cities
+
+            mapStateToCities[STATE] = mutableSetOf(CITY)
+            mapStateToCities[STATE]?.addAll(citiesSet)
         }
     }
 
@@ -101,9 +120,20 @@ class MainActivityVM @Inject constructor(
     }
 
     fun setFilterByState(state: String) {
+        val citiesList = mapStateToCities[state]!!.toMutableList()
+        _citiesFlow.value = citiesList
+        _filterByState.value = state
+    }
 
+    fun setFilterByCity(city: String) {
+        _filterByCity.value = city
     }
 
 }
 
-class FilterState(val city: String, val state: String)
+class FilterState(
+    val city: String,
+    val state: String,
+    val states: MutableList<String>,
+    val cities: MutableList<String>
+)

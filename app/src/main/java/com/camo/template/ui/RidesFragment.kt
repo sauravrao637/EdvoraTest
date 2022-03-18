@@ -56,9 +56,8 @@ class RidesFragment : Fragment() {
     private fun setUpListeners() {
         lifecycleScope.launchWhenStarted {
             viewModel.userState.collect {
-                if (it.status == Status.SUCCESS) {
-                    (binding?.rvRides?.adapter as RidesAdapter?)?.setUser(it.data)
-                }
+                (binding?.rvRides?.adapter as RidesAdapter?)?.setUser(it.data)
+                binding?.rvRides?.invalidate()
             }
         }
         lifecycleScope.launchWhenStarted {
@@ -95,6 +94,7 @@ class RidesFragment : Fragment() {
         }
         lifecycleScope.launchWhenStarted {
             viewModel.filterState.collect {
+                Timber.d("hi $it")
                 (binding?.rvRides?.adapter as RidesAdapter?)?.setFilter(it)
                 binding?.rvRides?.invalidate()
             }

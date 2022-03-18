@@ -50,11 +50,10 @@ class RidesAdapter @Inject constructor(
                         }
                     }
                     RidesFragment.RidesCategories.PAST -> {
-                        if (item.upcoming && !filterOut(item)) {
-                            hideItem()
-
-                        } else {
+                        if (!item.upcoming && !filterOut(item)) {
                             showItem()
+                        } else {
+                            hideItem()
                         }
                     }
                 }
@@ -87,12 +86,12 @@ class RidesAdapter @Inject constructor(
         private fun filterOut(ride: Ride): Boolean {
             if (filterByCity == CITY && filterByState == STATE) return false
             if (filterByCity == CITY) {
-                if (ride.state.lowercase() != filterByState.lowercase()) return false
+                if (ride.state.lowercase() == filterByState.lowercase()) return false
             }
             if (filterByState == STATE) {
-                if (ride.city.lowercase() != filterByCity.lowercase()) return false
+                if (ride.city.lowercase() == filterByCity.lowercase()) return false
             }
-            if (ride.state.lowercase() != filterByState.lowercase() || ride.city.lowercase() != filterByCity.lowercase()) return false
+            if (ride.state.lowercase() == filterByState.lowercase() && ride.city.lowercase() == filterByCity.lowercase()) return false
             return true
         }
     }
@@ -137,5 +136,6 @@ class RidesAdapter @Inject constructor(
     fun setFilter(filterState: FilterState){
         this.filterByCity = filterState.city
         this.filterByState = filterState.state
+        notifyDataSetChanged()
     }
 }
