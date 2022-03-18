@@ -66,7 +66,13 @@ class MainActivity : AppCompatActivity() {
                             .fitCenter()
                             .into(profileIv)
                     }
-                    else -> {
+                    Status.LOADING -> {
+                        textV.text = "Loading"
+                    }
+                    Status.ERROR ->{
+                        textV.text = "ERROR"
+                    }
+                    Status.IDLE ->{
                         textV.text = ""
                     }
                 }
@@ -97,6 +103,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpUi() {
+        viewModel.refresh()
         val adapter = RidesTabAdapter(this)
         binding.vpFragRides.adapter = adapter
         TabLayoutMediator(binding.tlFragRides, binding.vpFragRides) { tab, position ->

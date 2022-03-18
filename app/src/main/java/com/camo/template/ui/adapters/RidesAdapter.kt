@@ -61,7 +61,7 @@ class RidesAdapter @Inject constructor(
                 tvRideId.text =
                     binding.root.context.getString(R.string.ride_idPrefix) + " ${item.id}"
                 tvDistance.text =
-                    binding.root.context.getString(R.string.distancePrefix) + " ${item.dist ?: "User Not Found"}"
+                    binding.root.context.getString(R.string.distancePrefix) + " ${item.dist ?: "0"}"
                 tvDate.text = binding.root.context.getString(R.string.datePrefix) + " ${item.date}"
                 tvOriginStation.text =
                     binding.root.context.getString(R.string.origin_stationPrefix) + " ${item.originStationCode}"
@@ -103,7 +103,7 @@ class RidesAdapter @Inject constructor(
 
     private fun getDistanceForRide(stationPath: List<Int>): Int? {
         if (user == null)
-            return 0
+            return null
         var dist = MAX_VALUE
         for (int in stationPath) {
             dist = min(dist, abs(int - user!!.stationCode).toInt())
@@ -120,9 +120,11 @@ class RidesAdapter @Inject constructor(
 
     override fun getItemCount(): Int = list.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) =
-        if (position < list.size) holder.bind(list[position]) else {
-        }
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.setIsRecyclable(true)
+        return holder.bind(list[position])
+    }
+
 
     fun setUser(newUser: User?) {
         this.user = newUser

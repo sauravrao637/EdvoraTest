@@ -74,6 +74,7 @@ class RidesFragment : Fragment() {
                                         ridesCategory, viewModel.filterByState.value,
                                         viewModel.filterByCity.value
                                     )
+                                binding?.rvRides?.invalidate()
                             }
                         }
                         Status.ERROR -> {
@@ -94,7 +95,6 @@ class RidesFragment : Fragment() {
         }
         lifecycleScope.launchWhenStarted {
             viewModel.filterState.collect {
-                Timber.d("hi $it")
                 (binding?.rvRides?.adapter as RidesAdapter?)?.setFilter(it)
                 binding?.rvRides?.invalidate()
             }
@@ -104,7 +104,10 @@ class RidesFragment : Fragment() {
     private fun setupUI() {
         binding?.rvRides?.layoutManager = LinearLayoutManager(context)
         binding?.rvRides?.adapter = RidesAdapter(
-            arrayListOf(), null, ridesCategory, viewModel.filterByState.value,
+            viewModel.ridesState.value.data ?: arrayListOf(),
+            viewModel.userState.value.data,
+            ridesCategory,
+            viewModel.filterByState.value,
             viewModel.filterByCity.value
         )
     }
