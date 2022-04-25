@@ -1,6 +1,5 @@
 package com.camo.template.ui.adapters
 
-import android.graphics.Rect
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +14,6 @@ import com.camo.template.ui.RidesFragment
 import com.camo.template.ui.viewmodels.CITY
 import com.camo.template.ui.viewmodels.FilterState
 import com.camo.template.ui.viewmodels.STATE
-import timber.log.Timber
 import java.lang.Integer.MAX_VALUE
 import java.lang.Integer.min
 import javax.inject.Inject
@@ -23,12 +21,19 @@ import kotlin.math.abs
 
 class RidesAdapter @Inject constructor(
     private var list: Rides,
-    private var user: User?,
+    private var user: User,
     private val ridesCategories: RidesFragment.RidesCategories,
     private var filterByState: String,
     private var filterByCity: String
 ) :
     RecyclerView.Adapter<RidesAdapter.ViewHolder>() {
+
+    init {
+        for (i in list) {
+            i.dist = getDistanceForRide(i.stationPath)
+        }
+        list.sortBy { it.dist }
+    }
 
     inner class ViewHolder(private val binding: RideItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -68,6 +73,7 @@ class RidesAdapter @Inject constructor(
                 tvStateName.text = item.state
                 tvStationPath.text =
                     binding.root.context.getString(R.string.station_pathPrefix) + " ${item.stationPath.toList()}"
+                tvDistance.text = "${item.dist}"
                 Glide.with(binding.root.context)
                     .load(item.mapUrl)
                     .fitCenter()
@@ -101,12 +107,10 @@ class RidesAdapter @Inject constructor(
         root.layoutParams = RecyclerView.LayoutParams(0, 0)
     }
 
-    private fun getDistanceForRide(stationPath: List<Int>): Int? {
-        if (user == null)
-            return null
+    private fun getDistanceForRide(stationPath: List<Int>): Int {
         var dist = MAX_VALUE
         for (int in stationPath) {
-            dist = min(dist, abs(int - user!!.stationCode).toInt())
+            dist = min(dist, abs(int - user.stationCode).toInt())
         }
         return dist
     }
@@ -125,17 +129,7 @@ class RidesAdapter @Inject constructor(
         return holder.bind(list[position])
     }
 
-
-    fun setUser(newUser: User?) {
-        this.user = newUser
-        for (ride in list) {
-            ride.dist = getDistanceForRide(ride.stationPath)
-        }
-        list.sortBy { it.dist }
-        notifyDataSetChanged()
-    }
-
-    fun setFilter(filterState: FilterState){
+    fun setFilter(filterState: FilterState) {
         this.filterByCity = filterState.city
         this.filterByState = filterState.state
         notifyDataSetChanged()

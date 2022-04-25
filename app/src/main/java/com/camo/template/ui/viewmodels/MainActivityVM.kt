@@ -8,6 +8,7 @@ import com.camo.template.database.remote.model.User
 import com.camo.template.util.Resource
 import com.camo.template.util.Status
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -40,6 +41,12 @@ class MainActivityVM @Inject constructor(
     private val _filterByCity = MutableStateFlow(CITY)
     val filterByCity: StateFlow<String> get() = _filterByCity
 
+    val rideAndUserState: StateFlow<RideAndUserState> = combine(_ridesState,_userState){
+        a,b -> RideAndUserState(b,a)
+    }.stateIn(
+        viewModelScope, started = SharingStarted.Eagerly, RideAndUserState(Resource.idle(),Resource.idle())
+    )
+
     val filterState: StateFlow<FilterState> =
         combine(_filterByCity, _filterByState, _statesFlow, _citiesFlow) { a, b, c, d ->
             FilterState(a, b, c, d)
@@ -58,9 +65,13 @@ class MainActivityVM @Inject constructor(
     private fun getUser() {
         _getUserJob?.cancel()
         _getRidesJob = viewModelScope.launch {
-            cgRepo.getUserFlow().collect {
+            cgRepo.getUser().collect {
                 Timber.d("user: $it")
-                _userState.value = it
+                try {
+                    _userState.value = it as Resource<User>
+                } catch (e: Exception) {
+                    _userState.value = Resource.error(null, "Error")
+                }
             }
         }
     }
@@ -69,10 +80,14 @@ class MainActivityVM @Inject constructor(
     private fun getRides() {
         _getRidesJob?.cancel()
         _getRidesJob = viewModelScope.launch {
-            cgRepo.getRidesFlow().collect {
-                _ridesState.value = it
-                if (it.status == Status.SUCCESS && it.data != null) {
-                    addStatesAndCities(it.data)
+            cgRepo.getRides().collect {
+                try {
+                    _ridesState.value = it as Resource<Rides>
+                    if (it.status == Status.SUCCESS && it.data != null) {
+                        addStatesAndCities(it.data)
+                    }
+                } catch (e: Exception) {
+                    _ridesState.value = Resource.error(null, errorInfo = "Error")
                 }
             }
         }
@@ -122,6 +137,7 @@ class MainActivityVM @Inject constructor(
     fun setFilterByState(state: String) {
         val citiesList = mapStateToCities[state]!!.toMutableList()
         _citiesFlow.value = citiesList
+        if(_filterByState.value!= state)_filterByCity.value = CITY
         _filterByState.value = state
     }
 
@@ -130,6 +146,8 @@ class MainActivityVM @Inject constructor(
     }
 
 }
+
+class RideAndUserState(val user: Resource<User>, val rides: Resource<Rides>)
 
 class FilterState(
     val city: String,

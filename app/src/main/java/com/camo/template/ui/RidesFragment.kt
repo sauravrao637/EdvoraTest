@@ -54,38 +54,66 @@ class RidesFragment : Fragment() {
     }
 
     private fun setUpListeners() {
+//        lifecycleScope.launchWhenStarted {
+//            viewModel.userState.collect {
+//                (binding?.rvRides?.adapter as RidesAdapter?)?.setUser(it.data)
+//                binding?.rvRides?.invalidate()
+//            }
+//        }
+//        lifecycleScope.launchWhenStarted {
+//            viewModel.ridesState.collect {
+//                with(it) {
+//                    when (status) {
+//                        Status.SUCCESS -> {
+//                            binding?.srl?.isRefreshing = false
+//                            if (data != null) {
+//                                binding?.rvRides?.adapter =
+//                                    RidesAdapter(
+//                                        data,
+//                                        viewModel.userState.value.data,
+//                                        ridesCategory, viewModel.filterByState.value,
+//                                        viewModel.filterByCity.value
+//                                    )
+//                                binding?.rvRides?.invalidate()
+//                            }
+//                        }
+//                        Status.ERROR -> {
+//                            binding?.srl?.isRefreshing = false
+//                        }
+//                        Status.IDLE -> {
+//                            binding?.srl?.isRefreshing = false
+//                        }
+//                        Status.LOADING -> {
+//                            binding?.srl?.isRefreshing = true
+//                        }
+//                    }
+//                }
+//            }
+//        }
         lifecycleScope.launchWhenStarted {
-            viewModel.userState.collect {
-                (binding?.rvRides?.adapter as RidesAdapter?)?.setUser(it.data)
-                binding?.rvRides?.invalidate()
-            }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.ridesState.collect {
-                with(it) {
-                    when (status) {
-                        Status.SUCCESS -> {
-                            binding?.srl?.isRefreshing = false
-                            if (data != null) {
-                                binding?.rvRides?.adapter =
-                                    RidesAdapter(
-                                        data,
-                                        viewModel.userState.value.data,
-                                        ridesCategory, viewModel.filterByState.value,
-                                        viewModel.filterByCity.value
-                                    )
-                                binding?.rvRides?.invalidate()
-                            }
+            viewModel.rideAndUserState.collect {
+                when {
+                    it.user.status == Status.SUCCESS && it.rides.status == Status.SUCCESS -> {
+                        binding?.srl?.isRefreshing = false
+                        if (it.rides.data != null && it.user.data != null) {
+                            binding?.rvRides?.adapter =
+                                RidesAdapter(
+                                    it.rides.data,
+                                    it.user.data,
+                                    ridesCategory, viewModel.filterByState.value,
+                                    viewModel.filterByCity.value
+                                )
+                            binding?.rvRides?.invalidate()
                         }
-                        Status.ERROR -> {
-                            binding?.srl?.isRefreshing = false
-                        }
-                        Status.IDLE -> {
-                            binding?.srl?.isRefreshing = false
-                        }
-                        Status.LOADING -> {
-                            binding?.srl?.isRefreshing = true
-                        }
+                    }
+                    it.user.status == Status.ERROR || it.rides.status == Status.ERROR -> {
+                        binding?.srl?.isRefreshing = false
+                    }
+                    it.user.status == Status.LOADING || it.rides.status == Status.LOADING -> {
+                        binding?.srl?.isRefreshing = true
+                    }
+                    else -> {
+                        binding?.srl?.isRefreshing = false
                     }
                 }
             }
@@ -103,13 +131,6 @@ class RidesFragment : Fragment() {
 
     private fun setupUI() {
         binding?.rvRides?.layoutManager = LinearLayoutManager(context)
-        binding?.rvRides?.adapter = RidesAdapter(
-            viewModel.ridesState.value.data ?: arrayListOf(),
-            viewModel.userState.value.data,
-            ridesCategory,
-            viewModel.filterByState.value,
-            viewModel.filterByCity.value
-        )
     }
 
     companion object {

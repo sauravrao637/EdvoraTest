@@ -1,48 +1,43 @@
 package com.camo.template.database
 
+import androidx.room.withTransaction
 import com.camo.template.database.local.LocalAppDb
-import com.camo.template.database.remote.api.ETApiHelper
-import com.camo.template.database.remote.model.Rides
-import com.camo.template.database.remote.model.User
-import com.camo.template.util.Resource
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import com.camo.template.database.remote.api.ETService
+import com.camo.template.util.networkBoundResource
 import javax.inject.Inject
 
-class Repository @Inject constructor(private val db: LocalAppDb, val cgApiHelper: ETApiHelper) {
-//    suspend fun pingCG(): Flow<Resource<Response<Any>>> {
-//        return flow {
-//            emit(Resource.loading(data = null))
-//            try {
-//                val res = cgApiHelper.ping()
-//                Timber.d(res.toString())
-//                if (res.isSuccessful && res.code() == 200) emit(Resource.success(res))
-//                else {
-//                    Timber.d(res.toString())
-//                    emit(Resource.error(res, "Couldn't ping server"))
-//                }
-//            } catch (e: Exception) {
-//                Timber.d(e)
-//                emit(Resource.error(null, "Couldn't ping server"))
-//            }
-//        }
-//    }
-//
-//    suspend fun addCoins(coins: ArrayList<Coin>) {
-//        db.coinDao().addCoins(coins)
-//    }
+class Repository @Inject constructor(private val db: LocalAppDb, val api: ETService) {
+    private val userDao = db.userDao()
+    private val rideDao = db.rideDao()
 
-    suspend fun getRidesFlow(): Flow<Resource<Rides>>{
-        return flow {
-            emit(Resource.loading())
-            emit(cgApiHelper.getRides())
+    fun getRides() = networkBoundResource(
+        query = {
+            rideDao.getAllRides()
+        },
+        fetch = {
+            api.getRides()
+        },
+        saveFetchResult = { rides ->
+            db.withTransaction {
+                rideDao.deleteAllRides()
+                rideDao.insertRides(rides)
+            }
         }
-    }
+    )
 
-    fun getUserFlow(): Flow<Resource<User>> {
-        return flow{
-            emit(Resource.loading())
-            emit(cgApiHelper.getUser())
+    fun getUser() = networkBoundResource(
+        query = {
+            userDao.getUser()
+        },
+        fetch = {
+            api.getUser()
+        },
+        saveFetchResult = {
+            user ->
+            db.withTransaction {
+                userDao.deleteUsers()
+                userDao.addUser(user)
+            }
         }
-    }
+    )
 }

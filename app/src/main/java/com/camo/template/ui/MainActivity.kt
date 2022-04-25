@@ -54,25 +54,66 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpListeners() {
+//        lifecycleScope.launchWhenStarted {
+//            val textV = findViewById<TextView>(R.id.tvUsername)
+//            val profileIv = findViewById<ImageView>(R.id.ivProfile)
+//            viewModel.userState.collect {
+//                when (it.status) {
+//                    Status.SUCCESS -> {
+//                        textV.text = it.data?.name ?: "Error"
+//                        Glide.with(binding.root.context)
+//                            .load(it.data?.url)
+//                            .fitCenter()
+//                            .into(profileIv)
+//                    }
+//                    Status.LOADING -> {
+//                        textV.text = "Loading"
+//                    }
+//                    Status.ERROR ->{
+//                        textV.text = "ERROR"
+//                    }
+//                    Status.IDLE ->{
+//                        textV.text = ""
+//                    }
+//                }
+//            }
+//        }
+//        lifecycleScope.launchWhenStarted {
+//            viewModel.ridesState.collect {
+//                binding.tlFragRides.getTabAt(1)?.text =
+//                    this@MainActivity.getString(R.string.upcoming) + " (${viewModel.upcomingCount})"
+//                binding.tlFragRides.getTabAt(2)?.text =
+//                    this@MainActivity.getString(R.string.past) + " (${viewModel.pastCount})"
+//            }
+//        }
+
         lifecycleScope.launchWhenStarted {
-            val textV = findViewById<TextView>(R.id.tvUsername)
-            val profileIv = findViewById<ImageView>(R.id.ivProfile)
-            viewModel.userState.collect {
-                when (it.status) {
-                    Status.SUCCESS -> {
-                        textV.text = it.data?.name ?: "Error"
-                        Glide.with(binding.root.context)
-                            .load(it.data?.url)
-                            .fitCenter()
-                            .into(profileIv)
+            viewModel.rideAndUserState.collect {
+                val textV = findViewById<TextView>(R.id.tvUsername)
+                val profileIv = findViewById<ImageView>(R.id.ivProfile)
+                when {
+                    it.user.status == Status.SUCCESS && it.rides.status == Status.SUCCESS -> {
+                        if (it.rides.data != null && it.user.data != null) {
+                            textV.text = it.user.data.name ?: "Error"
+                            Glide.with(binding.root.context)
+                                .load(it.user.data.url)
+                                .fitCenter()
+                                .into(profileIv)
+                            binding.tlFragRides.getTabAt(1)?.text =
+                                this@MainActivity.getString(R.string.upcoming) + " (${viewModel.upcomingCount})"
+                            binding.tlFragRides.getTabAt(2)?.text =
+                                this@MainActivity.getString(R.string.past) + " (${viewModel.pastCount})"
+                        } else {
+                            textV.text = "ERROR"
+                        }
                     }
-                    Status.LOADING -> {
-                        textV.text = "Loading"
-                    }
-                    Status.ERROR ->{
+                    it.user.status == Status.ERROR || it.rides.status == Status.ERROR -> {
                         textV.text = "ERROR"
                     }
-                    Status.IDLE ->{
+                    it.user.status == Status.LOADING || it.rides.status == Status.LOADING -> {
+                        textV.text = "Loading"
+                    }
+                    else -> {
                         textV.text = ""
                     }
                 }
@@ -90,14 +131,6 @@ class MainActivity : AppCompatActivity() {
                     addAll(it.cities)
                     notifyDataSetChanged()
                 }
-            }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.ridesState.collect {
-                binding.tlFragRides.getTabAt(1)?.text =
-                    this@MainActivity.getString(R.string.upcoming) + " (${viewModel.upcomingCount})"
-                binding.tlFragRides.getTabAt(2)?.text =
-                    this@MainActivity.getString(R.string.past) + " (${viewModel.pastCount})"
             }
         }
     }

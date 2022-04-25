@@ -1,5 +1,6 @@
 package com.camo.template.database.remote.api
 
+import com.camo.template.database.remote.model.Ride
 import com.camo.template.database.remote.model.Rides
 import com.camo.template.database.remote.model.User
 import com.camo.template.util.Resource
@@ -10,8 +11,8 @@ interface ETService {
 //    @GET("ping")
 //    suspend fun ping(): Response<Any>
     @GET("rides")
-    suspend fun getRides(): Response<Rides>
+    suspend fun getRides(): List<Ride>
 
     @GET("user")
-    suspend fun getUser(): Response<User>
+    suspend fun getUser(): User
 }

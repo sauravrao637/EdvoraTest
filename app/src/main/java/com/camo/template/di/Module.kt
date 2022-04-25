@@ -2,11 +2,10 @@ package com.camo.template.di
 
 import android.content.Context
 import androidx.room.Room
-import com.camo.template.util.Constants
-import com.camo.template.database.local.LocalAppDb
-import com.camo.template.database.remote.api.ETApiHelper
-import com.camo.template.database.remote.api.ETService
 import com.camo.template.database.Repository
+import com.camo.template.database.local.LocalAppDb
+import com.camo.template.database.remote.api.ETService
+import com.camo.template.util.Constants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,11 +30,7 @@ object Module {
 
     @Provides
     @Singleton
-    fun getCGService(): ETService = getRetrofit().create(ETService::class.java)
-
-    @Provides
-    @Singleton
-    fun getCGApiHelper(): ETApiHelper = ETApiHelper(getCGService())
+    fun getETService(): ETService = getRetrofit().create(ETService::class.java)
 
     @Provides
     @Singleton
@@ -47,6 +42,7 @@ object Module {
 
     @Provides
     @Singleton
-    fun getRepo(@ApplicationContext context: Context): Repository = Repository(getAppDb(context), getCGApiHelper())
+    fun getRepo(@ApplicationContext context: Context): Repository =
+        Repository(getAppDb(context), getETService())
 
 }
